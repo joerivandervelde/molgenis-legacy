@@ -10,18 +10,23 @@
 package org.molgenis.model.elements;
 
 // jdk
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.molgenis.model.MolgenisModelException;
 
-
 /**
  * 
  */
 public class Model
 {
+	public Model()
+	{
+		this("unnamed_model");
+	}
+
 	// constructor
 	/**
 	 * 
@@ -154,11 +159,11 @@ public class Model
 		return views;
 	}
 
-	
-	public Vector<Entity> getEntities() {
+	public Vector<Entity> getEntities()
+	{
 		return getEntities(true);
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -170,18 +175,18 @@ public class Model
 		{
 			if (element.getClass().equals(Entity.class))
 			{
-				if(includeSystemTable || !((Entity) element).isSystem())
+				if (includeSystemTable || !((Entity) element).isSystem())
 				{
-					if(includeNonConcretes || !((Entity) element).isAbstract())
+					if (includeNonConcretes || !((Entity) element).isAbstract())
 					{
 						entities.add((Entity) element);
 					}
-				} 
+				}
 			}
 		}
 		return entities;
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -193,6 +198,127 @@ public class Model
 	public List<Module> getModules()
 	{
 		return this.getDatabase().getModules();
+	}
+
+	public Module getModule(String name)
+	{
+		for (Module module : this.getDatabase().getModules())
+		{
+			if (module.getName().toLowerCase().equals(name.toLowerCase())) return module;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Helper function ported from jaxb.Model
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public String findModuleNameForEntity(String name)
+	{
+		for (Module module : getModules())
+		{
+			for (Entity entity : module.getEntities())
+			{
+				if (entity.getName().equalsIgnoreCase(name)) return module.getName();
+			}
+		}
+		return null;
+	}
+
+	public DBSchema findEntity(String name)
+	{
+		for (int i = 0; i < database.getChildren().size(); i++)
+		{
+			if (database.getChildren().get(i).getClass().equals(Entity.class)
+					&& database.getChildren().get(i).getName().toLowerCase().equals(name.toLowerCase()))
+			{
+				return database.getChildren().get(i);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Find and remove an entity from either root or a module. If there are
+	 * entities in the module or root left, jump to the previous one in the
+	 * list. If there are no entities left in the root, return the name of the
+	 * root. If there are no entities left in the module, return the name of the
+	 * module.
+	 * 
+	 * @param string
+	 * @return
+	 */
+	public String findRemoveEntity(String name)
+	{
+		for (int i = 0; i < database.getChildren().size(); i++)
+		{
+			if (database.getChildren().get(i).getClass().equals(Entity.class)
+					&& database.getChildren().get(i).getName().toLowerCase().equals(name.toLowerCase()))
+			{
+				database.getChildren().remove(i);
+				List<DBSchema> entities = new ArrayList<DBSchema>();
+				for (int j = 0; j < database.getChildren().size(); j++)
+				{
+					if (database.getChildren().get(j).getClass().equals(Entity.class))
+					{
+						entities.add((database.getChildren().get(j)));
+					}
+				}
+				if (entities.size() > 0)
+				{
+					if (i == 0)
+					{
+						return entities.get(0).getName();
+					}
+					else
+					{
+						return entities.get(i - 1).getName();
+					}
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+		List<DBSchema> modules = new ArrayList<DBSchema>();
+		for (int i = 0; i < database.getChildren().size(); i++)
+		{
+			if (database.getChildren().get(i).getClass().equals(Module.class))
+			{
+				modules.add((database.getChildren().get(i)));
+			}
+		}
+		for (Module module : getModules())
+		{
+			for (int i = 0; i < module.getEntities().size(); i++)
+			{
+				if (module.getEntities().get(i).getName().toLowerCase().equals(name.toLowerCase()))
+				{
+					module.getEntities().remove(i);
+
+					if (module.getEntities().size() > 0)
+					{
+						if (i == 0)
+						{
+							return module.getEntities().get(0).getName();
+						}
+						else
+						{
+							return module.getEntities().get(i - 1).getName();
+						}
+					}
+					else
+					{
+						return null;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public Vector<Matrix> getMatrices()
@@ -277,7 +403,6 @@ public class Model
 		// System.exit(1);
 		return null;
 	}
-
 
 	/**
 	 * 
@@ -452,7 +577,7 @@ public class Model
 
 		for (UISchema u : getUserinterface().getAllChildren())
 		{
-			result.append(u.toString()+"\n");
+			result.append(u.toString() + "\n");
 		}
 
 		return result.toString();

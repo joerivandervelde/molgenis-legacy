@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Annotation classes.
- * Multiple entities can refer to one module.
+ * Annotation classes. Multiple entities can refer to one module.
+ * 
  * @author Morris Swertz
- *
+ * 
  */
 public class Module implements Serializable
 {
@@ -17,25 +17,33 @@ public class Module implements Serializable
 	String label;
 	String description;
 	List<Entity> entities = new ArrayList<Entity>();
-	
-	public Module(String name, Model model )
+
+	public Module(Model model)
+	{
+		this("unnamed_module", model);
+	}
+
+	public Module(String name, Model model)
 	{
 		this.setName(name);
 		model.getModules().add(this);
 	}
-	
+
 	public String getName()
 	{
 		return name;
 	}
+
 	public void setName(String name)
 	{
 		this.name = name;
 	}
+
 	public String getDescription()
 	{
 		return description;
 	}
+
 	public void setDescription(String description)
 	{
 		this.description = description;
@@ -51,9 +59,14 @@ public class Module implements Serializable
 		this.entities = entities;
 	}
 
+	public void addEntity(Entity entity)
+	{
+		this.entities.add(entity);
+	}
+
 	public String getLabel()
 	{
-		if(label == null) return getName();
+		if (label == null) return getName();
 		return label;
 	}
 
