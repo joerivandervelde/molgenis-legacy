@@ -21,6 +21,13 @@ public class TableReaderFactory
 	{
 	}
 
+	public static TableReader create(File file, String tableName) throws IOException
+	{
+		if (file == null) throw new IllegalArgumentException("file is null");
+		if (!file.isFile()) throw new IllegalArgumentException("file is not a file: " + file.getName());
+		return createTableReader(file, tableName);
+	}
+
 	public static TableReader create(File file) throws IOException
 	{
 		if (file == null) throw new IllegalArgumentException("file is null");
@@ -37,6 +44,33 @@ public class TableReaderFactory
 			tableReader.addTableReader(createTableReader(file));
 
 		return tableReader;
+	}
+
+	/**
+	 * Special createTableReader that can be told to load data into a specified table
+	 * instead of guessing from the file name or content (ZIP entries, Excel sheets).
+	 * Only CSV, TXT and TSV files are supported because for the 'collection' files
+	 * the behavior of this functionality would become unclear. Attempting to use this
+	 * function with a ZIP or Excel file results in an IOException.
+	 * 
+	 */
+	private static TableReader createTableReader(File file, String tableName) throws IOException
+	{
+		if (file == null) throw new IllegalArgumentException("file is null");
+
+		String name = file.getName();
+		if (name.endsWith(".csv") || name.endsWith(".txt"))
+		{
+			return new SingleTableReader(new CsvReader(file), tableName);
+		}
+		else if (name.endsWith(".tsv"))
+		{
+			return new SingleTableReader(new CsvReader(file, '\t'), tableName);
+		}
+		else
+		{
+			throw new IOException("ZIP/Excel not allowed. Please use createTableReader(File file) instead for files that are not CSV, TXT or TSV.");
+		}
 	}
 
 	private static TableReader createTableReader(File file) throws IOException

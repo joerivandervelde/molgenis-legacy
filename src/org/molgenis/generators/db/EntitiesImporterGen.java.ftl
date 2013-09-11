@@ -67,6 +67,12 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	}
 	
 	@Override
+	public EntityImportReport importEntities(File file, String tableName, DatabaseAction dbAction) throws IOException, DatabaseException
+	{
+		return importEntities(TableReaderFactory.create(file, tableName), dbAction);
+	}
+	
+	@Override
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException
 	{
 		return importEntities(TableReaderFactory.create(file), dbAction);

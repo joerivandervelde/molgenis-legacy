@@ -25,6 +25,19 @@ public interface EntitiesImporter
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException;
 
 	/**
+	 * Import entities from a {@link java.io.File} into a specified table
+	 * 
+	 * @param file
+	 * @param tableName
+	 * @param dbAction
+	 * @return
+	 * @throws IOException
+	 * @throws DatabaseException
+	 */
+	public EntityImportReport importEntities(File file, String tableName, DatabaseAction dbAction) throws IOException,
+			DatabaseException;
+
+	/**
 	 * Import entities from a {@link java.io.File} list
 	 * 
 	 * @param files
